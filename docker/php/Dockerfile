@@ -13,3 +13,5 @@ RUN apk update \
     && apk add mc
 
 WORKDIR /var/www
+
+CMD composer install
