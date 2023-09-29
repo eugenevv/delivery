@@ -1,0 +1,52 @@
+version: "3.9"
+services:
+  nginx:
+    build: ./docker/nginx
+    container_name: delivery_nginx
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+    volumes:
+      - ./docker/nginx/certs:/etc/nginx/certs
+      - ./src:/var/www
+    restart: always
+    links:
+      - app
+    networks:
+      php8112_default:
+        ipv4_address: 172.22.11.2
+  postgresql:
+    build: ./docker/postgresql
+    container_name: delivery_postgresql
+    networks:
+      php8112_default:
+        ipv4_address: 172.22.11.3
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: =${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - ./docker/postgresql/db-data:/var/lib/postgresql/data:rw
+  app:
+    build: ./docker/php
+    container_name: delivery_app
+    volumes:
+      - ./src:/var/www
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    networks:
+      php8112_default:
+        ipv4_address: 172.22.11.4
+networks:
+  php8112_default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "false"
+    ipam:
+      config:
+        - subnet: 172.22.11.0/24
+          gateway: 172.22.11.1
