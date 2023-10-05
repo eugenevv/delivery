@@ -28,7 +28,9 @@ services:
     volumes:
       - ./docker/postgresql/db-data:/var/lib/postgresql/data:rw
   app:
-    build: ./docker/php
+    build:
+      context: ./
+      dockerfile: ./docker/php/Dockerfile
     container_name: delivery_app
     volumes:
       - ./src:/var/www
